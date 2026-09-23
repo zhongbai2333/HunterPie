@@ -1,5 +1,6 @@
 using HunterPie.Core.Client.Configuration.Games;
 using HunterPie.Core.Domain.Enums;
+using HunterPie.Core.Observability.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace HunterPie.Core.Client.ConfigurationPresets;
 
@@ -14,6 +16,7 @@ namespace HunterPie.Core.Client.ConfigurationPresets;
 public sealed class GameConfigurationPresetStore
 {
     private const int MaxFileSize = 4 * 1024 * 1024;
+    private static readonly ILogger Logger = LoggerFactory.Create();
 
     private static readonly JsonSerializerSettings JsonSettings = new()
     {
@@ -70,7 +73,22 @@ public sealed class GameConfigurationPresetStore
 
         string snapshot = preset.Configuration.ToString(Formatting.None);
         JsonConvert.PopulateObject(snapshot, candidate, JsonSettings);
-        JsonConvert.PopulateObject(snapshot, configuration, JsonSettings);
+        // Fill fields absent from older snapshots with this version's defaults.
+        string normalizedSnapshot = JsonConvert.SerializeObject(candidate, JsonSettings);
+        JsonConvert.PopulateObject(normalizedSnapshot, configuration, JsonSettings);
+    }
+
+    public bool MatchesCurrent(GameConfigurationPreset preset, GameConfig configuration)
+    {
+        Validate(preset);
+        GameConfig candidate = CreateConfiguration(preset.Game);
+        if (configuration.GetType() != candidate.GetType())
+            throw new InvalidOperationException("The preset belongs to a different game.");
+
+        JsonConvert.PopulateObject(preset.Configuration.ToString(Formatting.None), candidate, JsonSettings);
+        return JToken.DeepEquals(
+            JObject.FromObject(candidate, JsonSerializer.Create(JsonSettings)),
+            JObject.FromObject(configuration, JsonSerializer.Create(JsonSettings)));
     }
 
     public void Delete(GameConfigurationPreset preset)
@@ -100,7 +118,9 @@ public sealed class GameConfigurationPresetStore
     public void Export(GameConfigurationPreset preset, string path)
     {
         Validate(preset);
-        File.WriteAllText(path, JsonConvert.SerializeObject(preset, Formatting.Indented, JsonSettings));
+        string contents = JsonConvert.SerializeObject(preset, Formatting.Indented, JsonSettings);
+        EnsureFileSize(contents);
+        File.WriteAllText(path, contents);
     }
 
     private void Persist(List<GameConfigurationPreset> presets)
@@ -110,19 +130,37 @@ public sealed class GameConfigurationPresetStore
             Directory.CreateDirectory(directory);
 
         string temporaryPath = _path + ".tmp";
-        File.WriteAllText(temporaryPath, JsonConvert.SerializeObject(presets, Formatting.Indented, JsonSettings));
+        string contents = JsonConvert.SerializeObject(presets, Formatting.Indented, JsonSettings);
+        EnsureFileSize(contents);
+        File.WriteAllText(temporaryPath, contents);
         File.Move(temporaryPath, _path, overwrite: true);
     }
 
     private static List<GameConfigurationPreset> ReadList(string path)
     {
         CheckFileSize(path);
-        List<GameConfigurationPreset> presets = JsonConvert.DeserializeObject<List<GameConfigurationPreset>>(
-            File.ReadAllText(path), JsonSettings)
-            ?? throw new InvalidDataException("The preset file is empty.");
+        string contents = File.ReadAllText(path);
+        if (string.IsNullOrWhiteSpace(contents))
+            throw new InvalidDataException("The preset file is empty.");
 
-        foreach (GameConfigurationPreset preset in presets)
-            Validate(preset);
+        JArray entries = JArray.Parse(contents);
+        var presets = new List<GameConfigurationPreset>();
+        foreach (JToken entry in entries)
+            try
+            {
+                GameConfigurationPreset preset = entry.ToObject<GameConfigurationPreset>(
+                    JsonSerializer.Create(JsonSettings))
+                    ?? throw new InvalidDataException("Invalid HunterPie game configuration preset.");
+                Validate(preset);
+                presets.Add(preset);
+            }
+            catch (Exception exception)
+            {
+                Logger.Warning($"Skipped invalid configuration preset: {exception}");
+            }
+
+        if (entries.Count > 0 && presets.Count == 0)
+            throw new InvalidDataException("Invalid HunterPie game configuration preset.");
 
         return presets;
     }
@@ -137,6 +175,12 @@ public sealed class GameConfigurationPresetStore
     private static void CheckFileSize(string path)
     {
         if (new FileInfo(path).Length > MaxFileSize)
+            throw new InvalidDataException("The preset file is too large.");
+    }
+
+    private static void EnsureFileSize(string contents)
+    {
+        if (Encoding.UTF8.GetByteCount(contents) > MaxFileSize)
             throw new InvalidDataException("The preset file is too large.");
     }
 

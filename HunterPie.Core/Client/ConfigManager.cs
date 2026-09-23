@@ -33,8 +33,10 @@ public class ConfigManager
     private static readonly Dictionary<string, string> _hashes = new();
     [ThreadStatic] private static int _batchDepth;
     [ThreadStatic] private static HashSet<string>? _pendingSaves;
+    [ThreadStatic] private static bool _isReadingSettings;
 
     public static event EventHandler<ConfigSaveEventArgs> OnSync;
+    public static event EventHandler<ConfigSaveEventArgs>? OnSaved;
 
     public static IReadOnlyDictionary<string, object> Settings => _settings;
 
@@ -126,6 +128,9 @@ public class ConfigManager
             return;
         }
 
+        if (_isReadingSettings)
+            return;
+
         if (_batchDepth > 0)
         {
             (_pendingSaves ??= new HashSet<string>()).Add(path);
@@ -139,9 +144,11 @@ public class ConfigManager
     public static void RunBatched(Action action)
     {
         _batchDepth++;
+        bool completed = false;
         try
         {
             action();
+            completed = true;
         }
         finally
         {
@@ -149,8 +156,9 @@ public class ConfigManager
             if (_batchDepth == 0 && _pendingSaves is { } pending)
             {
                 _pendingSaves = null;
-                foreach (string path in pending)
-                    WriteSettings(path);
+                if (completed)
+                    foreach (string path in pending)
+                        WriteSettings(path);
             }
         }
     }
@@ -168,7 +176,18 @@ public class ConfigManager
             {
                 string str = ConfigHelper.ReadObject(path);
 
-                JsonProvider.Populate(str, _settings[path]);
+                bool wasReadingSettings = _isReadingSettings;
+                _isReadingSettings = true;
+                try
+                {
+                    // Collection updates raise notifications for intermediate values.
+                    // Do not write those values back to the file being reloaded.
+                    JsonProvider.Populate(str, _settings[path]);
+                }
+                finally
+                {
+                    _isReadingSettings = wasReadingSettings;
+                }
             }
             catch (Exception err)
             {
@@ -180,6 +199,8 @@ public class ConfigManager
     {
         lock (_settings[path])
             ConfigHelper.WriteObject(path, _settings[path]);
+
+        OnSaved?.Invoke(null, new(path));
     }
 
     public static void BindConfiguration(string path, object data)

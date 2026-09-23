@@ -1,6 +1,7 @@
 ﻿using HunterPie.Core.Architecture;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 
 namespace HunterPie.Core.Converters;
 
@@ -18,9 +19,15 @@ public class ObservableHashSetConverter<T> : JsonConverter
             return existingCollection;
 
         // Equal keys may still contain different settings (for example monster parts).
-        // Replace the items while keeping the bound collection instance.
+        // Remove and add items individually so configuration observers can rebind them.
+        foreach (T item in existingCollection.ToArray())
+            existingCollection.Remove(item);
+
+        // Reset the empty set's free slots so the restored items keep their serialized order.
         existingCollection.Clear();
-        existingCollection.UnionWith(hashSet);
+
+        foreach (T item in hashSet)
+            existingCollection.Add(item);
 
         return existingCollection;
     }

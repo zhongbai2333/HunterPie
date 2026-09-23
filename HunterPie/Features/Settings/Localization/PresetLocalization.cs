@@ -11,6 +11,9 @@ internal static class PresetLocalization
     public static string Get(string id) =>
         Repository.FindStringBy($"//Strings/Client/Presets/String[@Id='{id}']");
 
+    public static string ConfirmationTitle =>
+        Repository.FindStringBy("//Strings/Client/Dialogs/Dialog[@Id='CONFIRMATION_TITLE_STRING']");
+
     public static string Format(string id, params object[] args) =>
         string.Format(Get(id), args);
 

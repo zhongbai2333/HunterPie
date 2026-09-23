@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace HunterPie.Core.Client.ConfigurationPresets;
 
-/// <summary>A snapshot of one game's complete configuration.</summary>
+/// <summary>A snapshot of one game's configuration.</summary>
 public sealed class GameConfigurationPreset
 {
     public int FormatVersion { get; set; } = 1;

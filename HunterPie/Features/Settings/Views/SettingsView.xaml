@@ -21,7 +21,8 @@
              d:DesignWidth="800"
              d:DataContext="{d:DesignInstance viewModels:SettingsViewModel}"
              Background="{DynamicResource Brushes.HunterPie.Background.Tertiary}"
-             Loaded="OnLoaded">
+             Loaded="OnLoaded"
+             Unloaded="OnUnloaded">
     <UserControl.Resources>
         <converters:IconResolver x:Key="IconResolver"/>
         <converters:GameProcessToGameNameConverter x:Key="GameProcessToGameNameConverter"/>
@@ -310,9 +311,24 @@
                                   ItemsSource="{Binding Presets}"
                                   SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
                                   IsSynchronizedWithCurrentItem="False"
-                                  DisplayMemberPath="Name"
                                   SelectionChanged="OnPresetSelectionChanged"
-                                  ToolTip="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;LIST_HINT&quot;]'}"/>
+                                  ToolTip="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;LIST_HINT&quot;]'}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDirty}" Value="True">
+                                                        <Setter Property="FontStyle" Value="Italic"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                         <buttons:Button Margin="2"
                                         Padding="7,3"
                                         CornerRadius="4"

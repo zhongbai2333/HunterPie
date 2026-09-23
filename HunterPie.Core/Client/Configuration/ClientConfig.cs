@@ -8,6 +8,7 @@ using HunterPie.Core.Settings.Annotations;
 using HunterPie.Core.Settings.Common;
 using HunterPie.Core.Settings.Types;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace HunterPie.Core.Client.Configuration;
@@ -82,6 +83,8 @@ public class ClientConfig : ISettings
 
     // States
     public Observable<GameProcessType> LastConfiguredGame { get; set; } = GameProcessType.MonsterHunterRise;
+
+    public Dictionary<GameProcessType, string> LastSelectedConfigurationPresets { get; set; } = new();
 
     // Themes
     [JsonConverter(typeof(ObservableCollectionConverter<string>))]

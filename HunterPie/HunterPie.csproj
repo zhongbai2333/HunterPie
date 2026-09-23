@@ -89,7 +89,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Features\Languages\Resources\Preset*.xml" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <EmbeddedResource Include="Features\Languages\Resources\Preset*.xml" />
   </ItemGroup>
 
   <ItemGroup>

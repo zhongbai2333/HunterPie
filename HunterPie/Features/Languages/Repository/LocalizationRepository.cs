@@ -142,14 +142,9 @@ internal class LocalizationRepository : ILocalizationRepository
 
     private static XmlDocument LoadPresetStrings(string language)
     {
-        string resourcePath = Path.Combine(
-            AppContext.BaseDirectory,
-            "Features",
-            "Languages",
-            "Resources",
-            $"Preset{language}.xml"
-        );
-        using Stream stream = File.OpenRead(resourcePath);
+        string resourceName = $"HunterPie.Features.Languages.Resources.Preset{language}.xml";
+        using Stream stream = typeof(LocalizationRepository).Assembly.GetManifestResourceStream(resourceName)
+            ?? throw new InvalidDataException($"Preset localization resource {language} is missing.");
 
         XmlDocument document = new();
         document.Load(stream);

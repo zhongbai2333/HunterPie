@@ -23,6 +23,8 @@ internal class SettingsViewModel : ViewModel
     private readonly PoogieVersionConnector _connector;
     private readonly GameConfigurationPresetStore? _presetStore;
     private readonly Dictionary<GameProcessType, ObservableCollection<IConfigurationCategory>> _configurations;
+    private PresetOptionViewModel? _activePreset;
+    private bool _restoringPresetSelection;
 
     public ObservableCollection<GameProcessType> ConfigurableGames { get; }
     public Observable<GameProcessType> SelectedGameConfiguration { get; }
@@ -32,8 +34,8 @@ internal class SettingsViewModel : ViewModel
     private ObservableCollection<IConfigurationCategory> _categories;
     public ObservableCollection<IConfigurationCategory> Categories { get => _categories; set => SetValue(ref _categories, value); }
     public DateTime SynchronizedAt { get; set => SetValue(ref field, value); } = DateTime.Now;
-    public ObservableCollection<GameConfigurationPreset> Presets { get; } = new();
-    public GameConfigurationPreset? SelectedPreset
+    public ObservableCollection<PresetOptionViewModel> Presets { get; } = new();
+    public PresetOptionViewModel? SelectedPreset
     {
         get;
         set
@@ -43,6 +45,9 @@ internal class SettingsViewModel : ViewModel
         }
     }
     public bool CanUsePreset { get; set => SetValue(ref field, value); }
+    public bool IsRestoringPresetSelection => _restoringPresetSelection;
+    public bool HasUnsavedPresetChanges => _activePreset?.IsDirty == true;
+    public string ActivePresetName => _activePreset?.Name ?? string.Empty;
     public string PresetName { get; set => SetValue(ref field, value); } = string.Empty;
     public string PresetStatus { get; set => SetValue(ref field, value); } = string.Empty;
 
@@ -131,24 +136,38 @@ internal class SettingsViewModel : ViewModel
                 PresetName,
                 SelectedGameConfiguration.Value,
                 ClientConfigHelper.GetGameConfigBy(SelectedGameConfiguration.Value));
+            RememberSelectedPreset(preset);
             RefreshPresets();
-            PresetName = preset.Name;
             PresetStatus = PresetLocalization.Format("SAVED", preset.Name);
         });
     }
 
-    public void ApplyPreset(GameConfigurationPreset preset)
+    public bool ApplyPreset(PresetOptionViewModel option)
     {
-        RunPresetAction(() =>
+        PresetOptionViewModel? previousPreset = _activePreset;
+        try
         {
+            GameConfigurationPreset preset = option.Preset;
+            _activePreset = option;
             ConfigManager.RunBatched(() =>
             {
                 Store.Apply(preset, ClientConfigHelper.GetGameConfigBy(preset.Game));
-                ConfigManager.Save(ClientConfig.CONFIG_NAME);
+                RememberSelectedPreset(preset);
             });
+            if (!ReferenceEquals(previousPreset, option))
+                previousPreset?.SetDirty(false);
             PresetName = preset.Name;
             PresetStatus = PresetLocalization.Format("APPLIED", preset.Name);
-        });
+            RefreshSelectedPresetMatch();
+            return true;
+        }
+        catch (Exception exception)
+        {
+            _activePreset = previousPreset;
+            PresetStatus = PresetLocalization.Error(exception);
+            RestoreSelectedPreset();
+            return false;
+        }
     }
 
     public void DeleteSelectedPreset()
@@ -157,6 +176,12 @@ internal class SettingsViewModel : ViewModel
         {
             GameConfigurationPreset preset = RequireSelection();
             Store.Delete(preset);
+            if (LastSelectedPresetNames.TryGetValue(preset.Game, out string? selectedName)
+                && string.Equals(selectedName, preset.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                LastSelectedPresetNames.Remove(preset.Game);
+                ConfigManager.Save(ClientConfig.CONFIG_NAME);
+            }
             RefreshPresets();
             PresetStatus = PresetLocalization.Format("DELETED", preset.Name);
         });
@@ -169,9 +194,13 @@ internal class SettingsViewModel : ViewModel
             GameConfigurationPreset preset = Store.Import(path);
             if (ConfigurableGames.Contains(preset.Game))
             {
-                SelectedGameConfiguration.Value = preset.Game;
-                ChangeSettingsGroup();
-                RefreshPresets();
+                if (SelectedGameConfiguration.Value == preset.Game)
+                    RefreshPresets();
+                else
+                {
+                    SelectedGameConfiguration.Value = preset.Game;
+                    ChangeSettingsGroup();
+                }
             }
 
             PresetStatus = PresetLocalization.Format("IMPORTED", preset.Name);
@@ -192,7 +221,55 @@ internal class SettingsViewModel : ViewModel
         ?? throw new InvalidOperationException("Preset storage is unavailable.");
 
     private GameConfigurationPreset RequireSelection() => SelectedPreset
-        ?? throw new InvalidOperationException("Select a preset first.");
+        is { } option ? option.Preset : throw new InvalidOperationException("Select a preset first.");
+
+    public void RestoreSelectedPreset()
+    {
+        _restoringPresetSelection = true;
+        try
+        {
+            SelectedPreset = _activePreset;
+        }
+        finally
+        {
+            _restoringPresetSelection = false;
+        }
+    }
+
+    public bool IsActivePreset(PresetOptionViewModel option) => ReferenceEquals(_activePreset, option);
+
+    public void RefreshSelectedPresetMatch()
+    {
+        if (_activePreset is null)
+            return;
+
+        try
+        {
+            bool wasDirty = _activePreset.IsDirty;
+            bool isDirty = !Store.MatchesCurrent(
+                _activePreset.Preset,
+                ClientConfigHelper.GetGameConfigBy(_activePreset.Preset.Game));
+            _activePreset.SetDirty(isDirty);
+            if (isDirty)
+                PresetStatus = PresetLocalization.Format("MODIFIED", _activePreset.Name);
+            else if (wasDirty)
+                PresetStatus = PresetLocalization.Format("MATCHES", _activePreset.Name);
+        }
+        catch (Exception exception)
+        {
+            _activePreset.SetDirty(true);
+            PresetStatus = PresetLocalization.Error(exception);
+        }
+    }
+
+    private static void RememberSelectedPreset(GameConfigurationPreset preset)
+    {
+        LastSelectedPresetNames[preset.Game] = preset.Name;
+        ConfigManager.Save(ClientConfig.CONFIG_NAME);
+    }
+
+    private static Dictionary<GameProcessType, string> LastSelectedPresetNames =>
+        ClientConfig.Config.Client.LastSelectedConfigurationPresets ??= new();
 
     private void RunPresetAction(Action action)
     {
@@ -208,18 +285,33 @@ internal class SettingsViewModel : ViewModel
 
     private void RefreshPresets()
     {
-        SelectedPreset = null;
-        Presets.Clear();
-        if (_presetStore is null)
-            return;
+        _restoringPresetSelection = true;
+        try
+        {
+            SelectedPreset = null;
+            _activePreset = null;
+            Presets.Clear();
+            if (_presetStore is null)
+                return;
 
-        foreach (GameConfigurationPreset preset in _presetStore.Presets
-            .Where(it => it.Game == SelectedGameConfiguration.Value)
-            .OrderBy(it => it.Name))
-            Presets.Add(preset);
+            foreach (GameConfigurationPreset preset in _presetStore.Presets
+                .Where(it => it.Game == SelectedGameConfiguration.Value)
+                .OrderBy(it => it.Name))
+                Presets.Add(new(preset));
 
-        PresetName = string.Empty;
-        PresetStatus = PresetLocalization.Get("INSTRUCTIONS");
+            LastSelectedPresetNames.TryGetValue(
+                SelectedGameConfiguration.Value, out string? selectedName);
+            _activePreset = Presets.FirstOrDefault(it =>
+                string.Equals(it.Name, selectedName, StringComparison.OrdinalIgnoreCase));
+            SelectedPreset = _activePreset;
+            PresetName = _activePreset?.Name ?? string.Empty;
+            PresetStatus = PresetLocalization.Get("INSTRUCTIONS");
+            RefreshSelectedPresetMatch();
+        }
+        finally
+        {
+            _restoringPresetSelection = false;
+        }
     }
 
     public void ExecuteUpdate() => App.Restart();
