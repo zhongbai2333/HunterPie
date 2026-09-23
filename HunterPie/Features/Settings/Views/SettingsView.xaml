@@ -279,11 +279,32 @@
                                    FontSize="12"
                                    Foreground="{DynamicResource Brushes.HunterPie.Foreground.Tertiary}"
                                    Text="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;TITLE&quot;]'}"/>
-                        <TextBox Width="135"
-                                 Margin="2"
-                                 Padding="5,3"
-                                 ToolTip="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;NAME_HINT&quot;]'}"
-                                 Text="{Binding PresetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Grid Width="135"
+                              Margin="2">
+                            <TextBox x:Name="PresetNameTextBox"
+                                     Padding="5,3"
+                                     MaxLength="80"
+                                     ToolTip="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;NAME_HINT&quot;]'}"
+                                     Text="{Binding PresetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource Brushes.HunterPie.Foreground.Tertiary}"
+                                       IsHitTestVisible="False"
+                                       Text="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;NAME_PLACEHOLDER&quot;]'}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=PresetNameTextBox}"
+                                                         Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
                         <ComboBox Width="155"
                                   Margin="2"
                                   ItemsSource="{Binding Presets}"

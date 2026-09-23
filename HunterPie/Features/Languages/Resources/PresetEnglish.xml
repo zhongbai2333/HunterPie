@@ -3,9 +3,15 @@
     <Client>
         <Presets>
             <String Id="TITLE"
-                    String="Preset" />
+                    String="Preset name" />
+            <String Id="INSTRUCTIONS"
+                    String="Enter a preset name, then select Save current." />
+            <String Id="NAME_REQUIRED"
+                    String="Enter a preset name before saving." />
             <String Id="NAME_HINT"
                     String="Name for the current game's configuration" />
+            <String Id="NAME_PLACEHOLDER"
+                    String="Preset name…" />
             <String Id="LIST_HINT"
                     String="Saved configurations for the selected game" />
             <String Id="SAVE"

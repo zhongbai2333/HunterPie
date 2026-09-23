@@ -121,6 +121,12 @@ internal class SettingsViewModel : ViewModel
 
     public void SaveCurrentPreset()
     {
+        if (string.IsNullOrWhiteSpace(PresetName))
+        {
+            PresetStatus = PresetLocalization.Get("NAME_REQUIRED");
+            return;
+        }
+
         RunPresetAction(() =>
         {
             GameConfigurationPreset preset = Store.SaveCurrent(
@@ -213,6 +219,9 @@ internal class SettingsViewModel : ViewModel
             Presets.Add(preset);
 
         SelectedPreset = selected;
+        PresetName = selected?.Name ?? string.Empty;
+        if (selected is null)
+            PresetStatus = PresetLocalization.Get("INSTRUCTIONS");
     }
 
     public void ExecuteUpdate() => App.Restart();

@@ -20,6 +20,26 @@ public class GameConfigurationPresetStoreTest
     }
 
     [TestMethod]
+    public void SaveCurrentRequiresPresetName()
+    {
+        string directory = CreateTemporaryDirectory();
+        try
+        {
+            string path = Path.Combine(directory, "presets.json");
+            var store = new GameConfigurationPresetStore(path);
+            InvalidDataException error = Assert.ThrowsException<InvalidDataException>(
+                () => store.SaveCurrent("   ", GameProcessType.MonsterHunterWorld, new MHWConfig()));
+
+            Assert.AreEqual("Preset name is required.", error.Message);
+            Assert.IsFalse(File.Exists(path));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void PresetRestoresWidgetPositionAndSettingsWithoutReplacingBoundObjects()
     {
         string directory = CreateTemporaryDirectory();

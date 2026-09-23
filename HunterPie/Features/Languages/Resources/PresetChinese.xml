@@ -3,9 +3,15 @@
     <Client>
         <Presets>
             <String Id="TITLE"
-                    String="配置预设" />
+                    String="预设名称" />
+            <String Id="INSTRUCTIONS"
+                    String="输入预设名称，然后点击“保存当前”。" />
+            <String Id="NAME_REQUIRED"
+                    String="请先输入预设名称。" />
             <String Id="NAME_HINT"
                     String="为当前游戏的整套配置命名" />
+            <String Id="NAME_PLACEHOLDER"
+                    String="预设名称…" />
             <String Id="LIST_HINT"
                     String="当前游戏已保存的配置预设" />
             <String Id="SAVE"

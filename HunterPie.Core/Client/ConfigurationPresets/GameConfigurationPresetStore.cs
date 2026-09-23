@@ -142,11 +142,13 @@ public sealed class GameConfigurationPresetStore
 
     private static void Validate(GameConfigurationPreset preset)
     {
+        if (string.IsNullOrWhiteSpace(preset.Name))
+            throw new InvalidDataException("Preset name is required.");
+
         if (preset.FormatVersion != 1
             || preset.Game is not (GameProcessType.MonsterHunterWorld
                 or GameProcessType.MonsterHunterRise
                 or GameProcessType.MonsterHunterWilds)
-            || string.IsNullOrWhiteSpace(preset.Name)
             || preset.Name.Length > 80
             || preset.Configuration?["Overlay"] is not JObject
             || preset.Configuration["RichPresence"] is not JObject)

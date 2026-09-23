@@ -27,6 +27,7 @@ internal static class PresetLocalization
             "The preset contains unsupported metadata." => "UNSUPPORTED_METADATA",
             "The preset belongs to a different game." => "DIFFERENT_GAME",
             "Unsupported game in preset." => "UNSUPPORTED_GAME",
+            "Preset name is required." => "NAME_REQUIRED",
             _ => null
         };
 
