@@ -271,6 +271,9 @@
                 <!-- Named configuration snapshots for the selected game -->
                 <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Margin="5,0" Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="4,0,2,0" VerticalAlignment="Center" FontSize="12"
+                                   Foreground="{DynamicResource Brushes.HunterPie.Foreground.Tertiary}"
+                                   Text="Preset" />
                         <TextBox Width="135" Margin="2" Padding="5,3"
                                  ToolTip="Name for the current game's configuration"
                                  Text="{Binding PresetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -279,13 +282,28 @@
                                   SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
                                   DisplayMemberPath="Name"
                                   ToolTip="Saved configurations for the selected game" />
-                        <Button Margin="2" Padding="7,3" Content="Save current" Click="OnSavePresetClick" />
-                        <Button Margin="2" Padding="7,3" Content="Apply" Click="OnApplyPresetClick"
+                        <buttons:Button Margin="2" Padding="7,3" CornerRadius="4"
+                                Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
+                                BorderBrush="{DynamicResource Brushes.HunterPie.Border}" BorderThickness="1"
+                                Content="Save current" Click="OnSavePresetClick" />
+                        <buttons:Button Margin="2" Padding="7,3" CornerRadius="4"
+                                Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
+                                BorderBrush="{DynamicResource Brushes.HunterPie.Border}" BorderThickness="1"
+                                Content="Apply" Click="OnApplyPresetClick"
                                 IsEnabled="{Binding CanUsePreset}" />
-                        <Button Margin="2" Padding="7,3" Content="Delete" Click="OnDeletePresetClick"
+                        <buttons:Button Margin="2" Padding="7,3" CornerRadius="4"
+                                Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
+                                BorderBrush="{DynamicResource Brushes.HunterPie.Border}" BorderThickness="1"
+                                Content="Delete" Click="OnDeletePresetClick"
                                 IsEnabled="{Binding CanUsePreset}" />
-                        <Button Margin="2" Padding="7,3" Content="Import" Click="OnImportPresetClick" />
-                        <Button Margin="2" Padding="7,3" Content="Export" Click="OnExportPresetClick"
+                        <buttons:Button Margin="2" Padding="7,3" CornerRadius="4"
+                                Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
+                                BorderBrush="{DynamicResource Brushes.HunterPie.Border}" BorderThickness="1"
+                                Content="Import" Click="OnImportPresetClick" />
+                        <buttons:Button Margin="2" Padding="7,3" CornerRadius="4"
+                                Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
+                                BorderBrush="{DynamicResource Brushes.HunterPie.Border}" BorderThickness="1"
+                                Content="Export" Click="OnExportPresetClick"
                                 IsEnabled="{Binding CanUsePreset}" />
                     </StackPanel>
                     <TextBlock Margin="4,2" FontSize="11" TextWrapping="Wrap"
