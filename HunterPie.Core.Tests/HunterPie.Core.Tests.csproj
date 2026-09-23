@@ -23,6 +23,12 @@
     <ProjectReference Include="..\HunterPie.Core\HunterPie.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\HunterPie\Game\**\Data\MonsterData.xml"
+             Link="Game\%(RecursiveDir)MonsterData.xml"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties BuildVersion_StartDate="2000/1/1" /></VisualStudio></ProjectExtensions>
 
 </Project>

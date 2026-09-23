@@ -196,7 +196,7 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="145"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Border Grid.Row="0"
@@ -211,8 +211,9 @@
                     <ColumnDefinition Width="1.3*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                    <RowDefinition Height="1.2*"/>
+                    <RowDefinition Height="35"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="70"/>
                 </Grid.RowDefinitions>
 
                 <!-- Top section -->
@@ -266,6 +267,31 @@
                                        Grid.Column="2"
                                        Margin="5"
                                        OnSearchTextChanged="OnSearchTextChanged"/>
+
+                <!-- Named configuration snapshots for the selected game -->
+                <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Margin="5,0" Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Width="135" Margin="2" Padding="5,3"
+                                 ToolTip="Name for the current game's configuration"
+                                 Text="{Binding PresetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <ComboBox Width="155" Margin="2"
+                                  ItemsSource="{Binding Presets}"
+                                  SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
+                                  DisplayMemberPath="Name"
+                                  ToolTip="Saved configurations for the selected game" />
+                        <Button Margin="2" Padding="7,3" Content="Save current" Click="OnSavePresetClick" />
+                        <Button Margin="2" Padding="7,3" Content="Apply" Click="OnApplyPresetClick"
+                                IsEnabled="{Binding CanUsePreset}" />
+                        <Button Margin="2" Padding="7,3" Content="Delete" Click="OnDeletePresetClick"
+                                IsEnabled="{Binding CanUsePreset}" />
+                        <Button Margin="2" Padding="7,3" Content="Import" Click="OnImportPresetClick" />
+                        <Button Margin="2" Padding="7,3" Content="Export" Click="OnExportPresetClick"
+                                IsEnabled="{Binding CanUsePreset}" />
+                    </StackPanel>
+                    <TextBlock Margin="4,2" FontSize="11" TextWrapping="Wrap"
+                               Foreground="{DynamicResource Brushes.HunterPie.Foreground.Tertiary}"
+                               Text="{Binding PresetStatus, Mode=OneWay}" />
+                </StackPanel>
             </Grid>
         </Border>
 

@@ -1,5 +1,6 @@
 ﻿using HunterPie.Core.Architecture;
 using HunterPie.Core.Client;
+using HunterPie.Core.Client.ConfigurationPresets;
 using HunterPie.Core.Domain.Enums;
 using HunterPie.Core.Extensions;
 using HunterPie.Core.Search;
@@ -19,6 +20,7 @@ namespace HunterPie.Features.Settings.ViewModels;
 internal class SettingsViewModel : ViewModel
 {
     private readonly PoogieVersionConnector _connector;
+    private readonly GameConfigurationPresetStore? _presetStore;
     private readonly Dictionary<GameProcessType, ObservableCollection<IConfigurationCategory>> _configurations;
 
     public ObservableCollection<GameProcessType> ConfigurableGames { get; }
@@ -29,6 +31,21 @@ internal class SettingsViewModel : ViewModel
     private ObservableCollection<IConfigurationCategory> _categories;
     public ObservableCollection<IConfigurationCategory> Categories { get => _categories; set => SetValue(ref _categories, value); }
     public DateTime SynchronizedAt { get; set => SetValue(ref field, value); } = DateTime.Now;
+    public ObservableCollection<GameConfigurationPreset> Presets { get; } = new();
+    public GameConfigurationPreset? SelectedPreset
+    {
+        get;
+        set
+        {
+            SetValue(ref field, value);
+            CanUsePreset = value is not null;
+            if (value is not null)
+                PresetName = value.Name;
+        }
+    }
+    public bool CanUsePreset { get; set => SetValue(ref field, value); }
+    public string PresetName { get; set => SetValue(ref field, value); } = string.Empty;
+    public string PresetStatus { get; set => SetValue(ref field, value); } = string.Empty;
 
     public SettingsViewModel(
         Dictionary<GameProcessType, ObservableCollection<ConfigurationCategoryGroup>> configurations,
@@ -41,6 +58,16 @@ internal class SettingsViewModel : ViewModel
         SelectedGameConfiguration = currentConfiguredGame;
         _connector = connector;
         _categories = _configurations[currentConfiguredGame.Value];
+
+        try
+        {
+            _presetStore = new GameConfigurationPresetStore(ClientInfo.GetPathFor("configuration-presets.json"));
+            RefreshPresets();
+        }
+        catch (Exception exception)
+        {
+            PresetStatus = $"Could not load presets: {exception.Message}";
+        }
 
         NavigateToFirstTab();
     }
@@ -88,6 +115,103 @@ internal class SettingsViewModel : ViewModel
 
         Categories = newCategories;
         NavigateToFirstTab();
+        RefreshPresets();
+    }
+
+    public void SaveCurrentPreset()
+    {
+        RunPresetAction(() =>
+        {
+            GameConfigurationPreset preset = Store.SaveCurrent(
+                PresetName,
+                SelectedGameConfiguration.Value,
+                ClientConfigHelper.GetGameConfigBy(SelectedGameConfiguration.Value));
+            RefreshPresets(preset);
+            PresetStatus = $"Saved {preset.Name}.";
+        });
+    }
+
+    public void ApplySelectedPreset()
+    {
+        RunPresetAction(() =>
+        {
+            GameConfigurationPreset preset = RequireSelection();
+            ConfigManager.RunBatched(() =>
+            {
+                Store.Apply(preset, ClientConfigHelper.GetGameConfigBy(preset.Game));
+                ConfigManager.Save(ClientConfig.CONFIG_NAME);
+            });
+            PresetStatus = $"Applied {preset.Name}. Some settings may need a restart.";
+        });
+    }
+
+    public void DeleteSelectedPreset()
+    {
+        RunPresetAction(() =>
+        {
+            GameConfigurationPreset preset = RequireSelection();
+            Store.Delete(preset);
+            RefreshPresets();
+            PresetStatus = $"Deleted {preset.Name}.";
+        });
+    }
+
+    public void ImportPreset(string path)
+    {
+        RunPresetAction(() =>
+        {
+            GameConfigurationPreset preset = Store.Import(path);
+            if (ConfigurableGames.Contains(preset.Game))
+            {
+                SelectedGameConfiguration.Value = preset.Game;
+                ChangeSettingsGroup();
+                RefreshPresets(preset);
+            }
+
+            PresetStatus = $"Imported {preset.Name} for {preset.Game}. Select Apply to use it.";
+        });
+    }
+
+    public void ExportSelectedPreset(string path)
+    {
+        RunPresetAction(() =>
+        {
+            GameConfigurationPreset preset = RequireSelection();
+            Store.Export(preset, path);
+            PresetStatus = $"Exported {preset.Name}.";
+        });
+    }
+
+    private GameConfigurationPresetStore Store => _presetStore
+        ?? throw new InvalidOperationException("Preset storage is unavailable.");
+
+    private GameConfigurationPreset RequireSelection() => SelectedPreset
+        ?? throw new InvalidOperationException("Select a preset first.");
+
+    private void RunPresetAction(Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception exception)
+        {
+            PresetStatus = exception.Message;
+        }
+    }
+
+    private void RefreshPresets(GameConfigurationPreset? selected = null)
+    {
+        Presets.Clear();
+        if (_presetStore is null)
+            return;
+
+        foreach (GameConfigurationPreset preset in _presetStore.Presets
+            .Where(it => it.Game == SelectedGameConfiguration.Value)
+            .OrderBy(it => it.Name))
+            Presets.Add(preset);
+
+        SelectedPreset = selected;
     }
 
     public void ExecuteUpdate() => App.Restart();

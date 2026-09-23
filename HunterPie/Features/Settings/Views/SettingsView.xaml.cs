@@ -5,7 +5,9 @@ using HunterPie.UI.Architecture.Tree;
 using HunterPie.UI.Controls.TextBox.Events;
 using HunterPie.UI.Settings.Converter.Model;
 using HunterPie.UI.Settings.ViewModels;
+using Microsoft.Win32;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -72,6 +74,66 @@ public partial class SettingsView : UserControl
             return;
 
         vm.ExecuteUpdate();
+    }
+
+    private void OnSavePresetClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not SettingsViewModel vm)
+            return;
+
+        if (vm.Presets.Any(it => string.Equals(it.Name, vm.PresetName.Trim(), System.StringComparison.OrdinalIgnoreCase))
+            && MessageBox.Show("Replace the existing preset with the current settings?", "HunterPie",
+                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            return;
+
+        vm.SaveCurrentPreset();
+    }
+
+    private void OnApplyPresetClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is SettingsViewModel vm)
+            vm.ApplySelectedPreset();
+    }
+
+    private void OnDeletePresetClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not SettingsViewModel vm || vm.SelectedPreset is null)
+            return;
+
+        if (MessageBox.Show($"Delete preset '{vm.SelectedPreset.Name}'?", "HunterPie",
+            MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            vm.DeleteSelectedPreset();
+    }
+
+    private void OnImportPresetClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not SettingsViewModel vm)
+            return;
+
+        var dialog = new OpenFileDialog
+        {
+            DefaultExt = ".json",
+            Filter = "HunterPie configuration preset (*.json)|*.json"
+        };
+
+        if (dialog.ShowDialog() == true)
+            vm.ImportPreset(dialog.FileName);
+    }
+
+    private void OnExportPresetClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not SettingsViewModel vm || vm.SelectedPreset is null)
+            return;
+
+        var dialog = new SaveFileDialog
+        {
+            DefaultExt = ".json",
+            Filter = "HunterPie configuration preset (*.json)|*.json",
+            FileName = "hunterpie-configuration-preset.json"
+        };
+
+        if (dialog.ShowDialog() == true)
+            vm.ExportSelectedPreset(dialog.FileName);
     }
 
     private void OnTitleClick(object sender, MouseButtonEventArgs e)

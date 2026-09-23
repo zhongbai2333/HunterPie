@@ -31,6 +31,8 @@ public class ConfigManager
     private const long MinTicks = 100 * TimeSpan.TicksPerMillisecond;
     private static readonly Dictionary<string, object> _settings = new();
     private static readonly Dictionary<string, string> _hashes = new();
+    [ThreadStatic] private static int _batchDepth;
+    [ThreadStatic] private static HashSet<string>? _pendingSaves;
 
     public static event EventHandler<ConfigSaveEventArgs> OnSync;
 
@@ -124,7 +126,33 @@ public class ConfigManager
             return;
         }
 
+        if (_batchDepth > 0)
+        {
+            (_pendingSaves ??= new HashSet<string>()).Add(path);
+            return;
+        }
+
         WriteSettings(path);
+    }
+
+    /// <summary>Collects synchronous configuration updates into a single write per file.</summary>
+    public static void RunBatched(Action action)
+    {
+        _batchDepth++;
+        try
+        {
+            action();
+        }
+        finally
+        {
+            _batchDepth--;
+            if (_batchDepth == 0 && _pendingSaves is { } pending)
+            {
+                _pendingSaves = null;
+                foreach (string path in pending)
+                    WriteSettings(path);
+            }
+        }
     }
 
     public static void SaveAll()
