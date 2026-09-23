@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Strings>
+  <Client>
+    <Presets>
+      <String Id="TITLE" String="Preset" />
+      <String Id="NAME_HINT" String="Name for the current game's configuration" />
+      <String Id="LIST_HINT" String="Saved configurations for the selected game" />
+      <String Id="SAVE" String="Save current" />
+      <String Id="APPLY" String="Apply" />
+      <String Id="DELETE" String="Delete" />
+      <String Id="IMPORT" String="Import" />
+      <String Id="EXPORT" String="Export" />
+      <String Id="REPLACE_CONFIRM" String="Replace the existing preset with the current settings?" />
+      <String Id="DELETE_CONFIRM" String="Delete preset '{0}'?" />
+      <String Id="FILE_FILTER" String="HunterPie configuration preset (*.json)|*.json" />
+      <String Id="LOAD_FAILED" String="Could not load presets: {0}" />
+      <String Id="SAVED" String="Saved {0}." />
+      <String Id="APPLIED" String="Applied {0}. Some settings may need a restart." />
+      <String Id="DELETED" String="Deleted {0}." />
+      <String Id="IMPORTED" String="Imported {0}. Select Apply to use it." />
+      <String Id="EXPORTED" String="Exported {0}." />
+      <String Id="STORE_UNAVAILABLE" String="Preset storage is unavailable." />
+      <String Id="SELECT_FIRST" String="Select a preset first." />
+      <String Id="NAME_EXISTS" String="A preset with this name already exists for this game." />
+      <String Id="INVALID" String="Invalid HunterPie game configuration preset." />
+      <String Id="EMPTY_FILE" String="The preset file is empty." />
+      <String Id="LARGE_FILE" String="The preset file is too large." />
+      <String Id="UNSUPPORTED_METADATA" String="The preset contains unsupported metadata." />
+      <String Id="DIFFERENT_GAME" String="The preset belongs to a different game." />
+      <String Id="UNSUPPORTED_GAME" String="Unsupported game in preset." />
+      <String Id="OPERATION_FAILED" String="Preset operation failed: {0}" />
+    </Presets>
+  </Client>
+</Strings>

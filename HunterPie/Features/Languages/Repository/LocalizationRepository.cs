@@ -93,6 +93,7 @@ internal class LocalizationRepository : ILocalizationRepository
 
         var document = new XmlDocument();
         document.Load(defaultDocument);
+        AddPresetStrings(document);
 
         string selectedLanguageDocument = Path.Combine(ClientInfo.LanguagesPath, ClientConfig.Config.Client.Language);
 
@@ -114,9 +115,45 @@ internal class LocalizationRepository : ILocalizationRepository
             target: document
         );
 
+        string presetLanguage = ClientConfig.Config.Client.Language.Current.ToLowerInvariant() switch
+        {
+            "zh-cn.xml" => "Chinese",
+            "zh-tw.xml" => "TraditionalChinese",
+            _ => string.Empty
+        };
+        if (presetLanguage.Length > 0)
+            MergeDocuments(LoadPresetStrings(presetLanguage), finalDocument);
+
         Logger.Info($"Loaded localization {Path.GetFileNameWithoutExtension(defaultDocument)} successfully");
 
         return finalDocument;
+    }
+
+    private static void AddPresetStrings(XmlDocument document)
+    {
+        XmlNode? client = document.SelectSingleNode("/Strings/Client");
+        XmlNode? presets = LoadPresetStrings("English").SelectSingleNode("/Strings/Client/Presets");
+
+        if (client is null || presets is null)
+            throw new InvalidDataException("Preset localization resources are invalid.");
+
+        client.AppendChild(document.ImportNode(presets, deep: true));
+    }
+
+    private static XmlDocument LoadPresetStrings(string language)
+    {
+        string resourcePath = Path.Combine(
+            AppContext.BaseDirectory,
+            "Features",
+            "Languages",
+            "Resources",
+            $"Preset{language}.xml"
+        );
+        using Stream stream = File.OpenRead(resourcePath);
+
+        XmlDocument document = new();
+        document.Load(stream);
+        return document;
     }
 
     private static XmlDocument MergeDocuments(XmlDocument source, XmlDocument target)

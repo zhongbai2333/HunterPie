@@ -273,37 +273,42 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Margin="4,0,2,0" VerticalAlignment="Center" FontSize="12"
                                    Foreground="{DynamicResource Brushes.HunterPie.Foreground.Tertiary}"
-                                   Text="Preset" />
+                                   Text="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;TITLE&quot;]'}" />
                         <TextBox Width="135" Margin="2" Padding="5,3"
-                                 ToolTip="Name for the current game's configuration"
+                                 ToolTip="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;NAME_HINT&quot;]'}"
                                  Text="{Binding PresetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <ComboBox Width="155" Margin="2"
                                   ItemsSource="{Binding Presets}"
                                   SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
                                   DisplayMemberPath="Name"
-                                  ToolTip="Saved configurations for the selected game" />
+                                  ToolTip="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;LIST_HINT&quot;]'}" />
                         <buttons:Button Margin="2" Padding="7,3" CornerRadius="4"
                                 Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
+                                Foreground="{DynamicResource Brushes.HunterPie.Foreground.Primary}"
                                 BorderBrush="{DynamicResource Brushes.HunterPie.Border}" BorderThickness="1"
-                                Content="Save current" Click="OnSavePresetClick" />
+                                Content="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;SAVE&quot;]'}" Click="OnSavePresetClick" />
                         <buttons:Button Margin="2" Padding="7,3" CornerRadius="4"
                                 Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
+                                Foreground="{DynamicResource Brushes.HunterPie.Foreground.Primary}"
                                 BorderBrush="{DynamicResource Brushes.HunterPie.Border}" BorderThickness="1"
-                                Content="Apply" Click="OnApplyPresetClick"
+                                Content="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;APPLY&quot;]'}" Click="OnApplyPresetClick"
                                 IsEnabled="{Binding CanUsePreset}" />
                         <buttons:Button Margin="2" Padding="7,3" CornerRadius="4"
                                 Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
+                                Foreground="{DynamicResource Brushes.HunterPie.Foreground.Primary}"
                                 BorderBrush="{DynamicResource Brushes.HunterPie.Border}" BorderThickness="1"
-                                Content="Delete" Click="OnDeletePresetClick"
+                                Content="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;DELETE&quot;]'}" Click="OnDeletePresetClick"
                                 IsEnabled="{Binding CanUsePreset}" />
                         <buttons:Button Margin="2" Padding="7,3" CornerRadius="4"
                                 Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
+                                Foreground="{DynamicResource Brushes.HunterPie.Foreground.Primary}"
                                 BorderBrush="{DynamicResource Brushes.HunterPie.Border}" BorderThickness="1"
-                                Content="Import" Click="OnImportPresetClick" />
+                                Content="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;IMPORT&quot;]'}" Click="OnImportPresetClick" />
                         <buttons:Button Margin="2" Padding="7,3" CornerRadius="4"
                                 Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
+                                Foreground="{DynamicResource Brushes.HunterPie.Foreground.Primary}"
                                 BorderBrush="{DynamicResource Brushes.HunterPie.Border}" BorderThickness="1"
-                                Content="Export" Click="OnExportPresetClick"
+                                Content="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;EXPORT&quot;]'}" Click="OnExportPresetClick"
                                 IsEnabled="{Binding CanUsePreset}" />
                     </StackPanel>
                     <TextBlock Margin="4,2" FontSize="11" TextWrapping="Wrap"

@@ -4,6 +4,7 @@ using HunterPie.Core.Client.ConfigurationPresets;
 using HunterPie.Core.Domain.Enums;
 using HunterPie.Core.Extensions;
 using HunterPie.Core.Search;
+using HunterPie.Features.Settings.Localization;
 using HunterPie.Integrations.Poogie.Common.Models;
 using HunterPie.Integrations.Poogie.Version;
 using HunterPie.Integrations.Poogie.Version.Models;
@@ -66,7 +67,7 @@ internal class SettingsViewModel : ViewModel
         }
         catch (Exception exception)
         {
-            PresetStatus = $"Could not load presets: {exception.Message}";
+            PresetStatus = PresetLocalization.Format("LOAD_FAILED", PresetLocalization.Error(exception));
         }
 
         NavigateToFirstTab();
@@ -127,7 +128,7 @@ internal class SettingsViewModel : ViewModel
                 SelectedGameConfiguration.Value,
                 ClientConfigHelper.GetGameConfigBy(SelectedGameConfiguration.Value));
             RefreshPresets(preset);
-            PresetStatus = $"Saved {preset.Name}.";
+            PresetStatus = PresetLocalization.Format("SAVED", preset.Name);
         });
     }
 
@@ -141,7 +142,7 @@ internal class SettingsViewModel : ViewModel
                 Store.Apply(preset, ClientConfigHelper.GetGameConfigBy(preset.Game));
                 ConfigManager.Save(ClientConfig.CONFIG_NAME);
             });
-            PresetStatus = $"Applied {preset.Name}. Some settings may need a restart.";
+            PresetStatus = PresetLocalization.Format("APPLIED", preset.Name);
         });
     }
 
@@ -152,7 +153,7 @@ internal class SettingsViewModel : ViewModel
             GameConfigurationPreset preset = RequireSelection();
             Store.Delete(preset);
             RefreshPresets();
-            PresetStatus = $"Deleted {preset.Name}.";
+            PresetStatus = PresetLocalization.Format("DELETED", preset.Name);
         });
     }
 
@@ -168,7 +169,7 @@ internal class SettingsViewModel : ViewModel
                 RefreshPresets(preset);
             }
 
-            PresetStatus = $"Imported {preset.Name} for {preset.Game}. Select Apply to use it.";
+            PresetStatus = PresetLocalization.Format("IMPORTED", preset.Name);
         });
     }
 
@@ -178,7 +179,7 @@ internal class SettingsViewModel : ViewModel
         {
             GameConfigurationPreset preset = RequireSelection();
             Store.Export(preset, path);
-            PresetStatus = $"Exported {preset.Name}.";
+            PresetStatus = PresetLocalization.Format("EXPORTED", preset.Name);
         });
     }
 
@@ -196,7 +197,7 @@ internal class SettingsViewModel : ViewModel
         }
         catch (Exception exception)
         {
-            PresetStatus = exception.Message;
+            PresetStatus = PresetLocalization.Error(exception);
         }
     }
 

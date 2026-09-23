@@ -1,4 +1,5 @@
 ﻿using HunterPie.Core.Architecture;
+using HunterPie.Features.Settings.Localization;
 using HunterPie.Features.Settings.ViewModels;
 using HunterPie.UI.Architecture.Bindings;
 using HunterPie.UI.Architecture.Tree;
@@ -82,7 +83,7 @@ public partial class SettingsView : UserControl
             return;
 
         if (vm.Presets.Any(it => string.Equals(it.Name, vm.PresetName.Trim(), System.StringComparison.OrdinalIgnoreCase))
-            && MessageBox.Show("Replace the existing preset with the current settings?", "HunterPie",
+            && MessageBox.Show(PresetLocalization.Get("REPLACE_CONFIRM"), "HunterPie",
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
             return;
 
@@ -100,7 +101,7 @@ public partial class SettingsView : UserControl
         if (DataContext is not SettingsViewModel vm || vm.SelectedPreset is null)
             return;
 
-        if (MessageBox.Show($"Delete preset '{vm.SelectedPreset.Name}'?", "HunterPie",
+        if (MessageBox.Show(PresetLocalization.Format("DELETE_CONFIRM", vm.SelectedPreset.Name), "HunterPie",
             MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             vm.DeleteSelectedPreset();
     }
@@ -113,7 +114,7 @@ public partial class SettingsView : UserControl
         var dialog = new OpenFileDialog
         {
             DefaultExt = ".json",
-            Filter = "HunterPie configuration preset (*.json)|*.json"
+            Filter = PresetLocalization.Get("FILE_FILTER")
         };
 
         if (dialog.ShowDialog() == true)
@@ -128,7 +129,7 @@ public partial class SettingsView : UserControl
         var dialog = new SaveFileDialog
         {
             DefaultExt = ".json",
-            Filter = "HunterPie configuration preset (*.json)|*.json",
+            Filter = PresetLocalization.Get("FILE_FILTER"),
             FileName = "hunterpie-configuration-preset.json"
         };
 

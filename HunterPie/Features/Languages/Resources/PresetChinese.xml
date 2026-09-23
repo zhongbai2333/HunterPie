@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Strings>
+  <Client>
+    <Presets>
+      <String Id="TITLE" String="配置预设" />
+      <String Id="NAME_HINT" String="为当前游戏的整套配置命名" />
+      <String Id="LIST_HINT" String="当前游戏已保存的配置预设" />
+      <String Id="SAVE" String="保存当前" />
+      <String Id="APPLY" String="应用" />
+      <String Id="DELETE" String="删除" />
+      <String Id="IMPORT" String="导入" />
+      <String Id="EXPORT" String="导出" />
+      <String Id="REPLACE_CONFIRM" String="要用当前设置覆盖同名预设吗？" />
+      <String Id="DELETE_CONFIRM" String="要删除预设“{0}”吗？" />
+      <String Id="FILE_FILTER" String="HunterPie 配置预设 (*.json)|*.json" />
+      <String Id="LOAD_FAILED" String="无法加载预设：{0}" />
+      <String Id="SAVED" String="已保存预设“{0}”。" />
+      <String Id="APPLIED" String="已应用预设“{0}”。部分设置可能需要重启后生效。" />
+      <String Id="DELETED" String="已删除预设“{0}”。" />
+      <String Id="IMPORTED" String="已导入预设“{0}”。点击“应用”后生效。" />
+      <String Id="EXPORTED" String="已导出预设“{0}”。" />
+      <String Id="STORE_UNAVAILABLE" String="预设存储不可用。" />
+      <String Id="SELECT_FIRST" String="请先选择一个预设。" />
+      <String Id="NAME_EXISTS" String="该游戏已有同名预设。" />
+      <String Id="INVALID" String="HunterPie 游戏配置预设无效。" />
+      <String Id="EMPTY_FILE" String="预设文件为空。" />
+      <String Id="LARGE_FILE" String="预设文件过大。" />
+      <String Id="UNSUPPORTED_METADATA" String="预设包含不受支持的元数据。" />
+      <String Id="DIFFERENT_GAME" String="该预设属于另一款游戏。" />
+      <String Id="UNSUPPORTED_GAME" String="预设中的游戏类型不受支持。" />
+      <String Id="OPERATION_FAILED" String="预设操作失败：{0}" />
+    </Presets>
+  </Client>
+</Strings>

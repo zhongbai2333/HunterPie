@@ -89,6 +89,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Features\Languages\Resources\Preset*.xml" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resources\Icon.ico" />
   </ItemGroup>
 
