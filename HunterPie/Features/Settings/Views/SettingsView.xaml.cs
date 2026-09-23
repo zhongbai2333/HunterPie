@@ -1,5 +1,6 @@
 ﻿using HunterPie.Core.Architecture;
 using HunterPie.Features.Settings.Localization;
+using HunterPie.Core.Client.ConfigurationPresets;
 using HunterPie.Features.Settings.ViewModels;
 using HunterPie.UI.Architecture.Bindings;
 using HunterPie.UI.Architecture.Tree;
@@ -90,10 +91,11 @@ public partial class SettingsView : UserControl
         vm.SaveCurrentPreset();
     }
 
-    private void OnApplyPresetClick(object sender, RoutedEventArgs e)
+    private void OnPresetSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (DataContext is SettingsViewModel vm)
-            vm.ApplySelectedPreset();
+        if (DataContext is SettingsViewModel vm && e.AddedItems.Count == 1
+            && e.AddedItems[0] is GameConfigurationPreset preset)
+            vm.ApplyPreset(preset);
     }
 
     private void OnDeletePresetClick(object sender, RoutedEventArgs e)

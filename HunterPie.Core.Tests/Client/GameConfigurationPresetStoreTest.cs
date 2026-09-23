@@ -1,5 +1,6 @@
 using HunterPie.Core.Client.Configuration.Games;
 using HunterPie.Core.Client.Configuration.Overlay;
+using HunterPie.Core.Client.Configuration.Overlay.Monster;
 using HunterPie.Core.Client.ConfigurationPresets;
 using HunterPie.Core.Domain.Enums;
 using HunterPie.Core.Domain.Mapper;
@@ -7,6 +8,7 @@ using HunterPie.Core.Domain.Mapper.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace HunterPie.Core.Tests.Client;
 
@@ -68,6 +70,44 @@ public class GameConfigurationPresetStoreTest
             Assert.AreSame(compactMode, config.Overlay.BossesWidget.IsCompactModeEnabled);
             Assert.AreEqual(432, tray.Position.Y);
             Assert.AreSame(tray, config.Overlay.AbnormalityTray.Trays.Trays[0]);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public void PresetRestoresMonsterDetailOverridesWithExistingMonsterId()
+    {
+        string directory = CreateTemporaryDirectory();
+        try
+        {
+            var config = new MHWConfig();
+            var part = new MonsterPartConfiguration
+            {
+                Id = 10,
+                StringId = "test-part",
+                IsEnabled = false
+            };
+            var monster = new MonsterConfiguration
+            {
+                Id = 1,
+                Parts = new() { part },
+                Ailments = new()
+            };
+            var overrides = config.Overlay.BossesWidget.Details.Monsters;
+            overrides.Add(monster);
+            string path = Path.Combine(directory, "presets.json");
+            var store = new GameConfigurationPresetStore(path);
+            store.SaveCurrent("Details", GameProcessType.MonsterHunterWorld, config);
+
+            part.IsEnabled.Value = true;
+            var reloaded = new GameConfigurationPresetStore(path);
+            reloaded.Apply(reloaded.Presets.Single(), config);
+
+            Assert.AreSame(overrides, config.Overlay.BossesWidget.Details.Monsters);
+            Assert.IsFalse(config.Overlay.BossesWidget.Details.Monsters.Single().Parts.Single().IsEnabled.Value);
         }
         finally
         {

@@ -5,7 +5,7 @@
             <String Id="TITLE"
                     String="Preset name" />
             <String Id="INSTRUCTIONS"
-                    String="Enter a preset name, then select Save current." />
+                    String="Name and save a preset, or select one to apply it." />
             <String Id="NAME_REQUIRED"
                     String="Enter a preset name before saving." />
             <String Id="NAME_HINT"
@@ -13,11 +13,9 @@
             <String Id="NAME_PLACEHOLDER"
                     String="Preset name…" />
             <String Id="LIST_HINT"
-                    String="Saved configurations for the selected game" />
+                    String="Select a preset to apply it to the current game" />
             <String Id="SAVE"
                     String="Save current" />
-            <String Id="APPLY"
-                    String="Apply" />
             <String Id="DELETE"
                     String="Delete" />
             <String Id="IMPORT"
@@ -39,7 +37,7 @@
             <String Id="DELETED"
                     String="Deleted {0}." />
             <String Id="IMPORTED"
-                    String="Imported {0}. Select Apply to use it." />
+                    String="Imported {0}. Select it from the list to apply it." />
             <String Id="EXPORTED"
                     String="Exported {0}." />
             <String Id="STORE_UNAVAILABLE"

@@ -1,8 +1,6 @@
 ﻿using HunterPie.Core.Architecture;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace HunterPie.Core.Converters;
 
@@ -19,9 +17,9 @@ public class ObservableHashSetConverter<T> : JsonConverter
         if (hashSet is not { })
             return existingCollection;
 
-        IEnumerable<T> valuesToDelete = existingCollection.Where(it => !hashSet.Contains(it));
-
-        existingCollection.ExceptWith(valuesToDelete);
+        // Equal keys may still contain different settings (for example monster parts).
+        // Replace the items while keeping the bound collection instance.
+        existingCollection.Clear();
         existingCollection.UnionWith(hashSet);
 
         return existingCollection;

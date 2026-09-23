@@ -309,7 +309,9 @@
                                   Margin="2"
                                   ItemsSource="{Binding Presets}"
                                   SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
+                                  IsSynchronizedWithCurrentItem="False"
                                   DisplayMemberPath="Name"
+                                  SelectionChanged="OnPresetSelectionChanged"
                                   ToolTip="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;LIST_HINT&quot;]'}"/>
                         <buttons:Button Margin="2"
                                         Padding="7,3"
@@ -320,16 +322,6 @@
                                         BorderThickness="1"
                                         Content="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;SAVE&quot;]'}"
                                         Click="OnSavePresetClick"/>
-                        <buttons:Button Margin="2"
-                                        Padding="7,3"
-                                        CornerRadius="4"
-                                        Background="{DynamicResource Brushes.HunterPie.Background.Secondary}"
-                                        Foreground="{DynamicResource Brushes.HunterPie.Foreground.Primary}"
-                                        BorderBrush="{DynamicResource Brushes.HunterPie.Border}"
-                                        BorderThickness="1"
-                                        Content="{markup:Localization '//Strings/Client/Presets/String[@Id=&quot;APPLY&quot;]'}"
-                                        Click="OnApplyPresetClick"
-                                        IsEnabled="{Binding CanUsePreset}"/>
                         <buttons:Button Margin="2"
                                         Padding="7,3"
                                         CornerRadius="4"

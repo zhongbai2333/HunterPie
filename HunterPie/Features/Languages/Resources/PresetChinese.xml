@@ -5,7 +5,7 @@
             <String Id="TITLE"
                     String="预设名称" />
             <String Id="INSTRUCTIONS"
-                    String="输入预设名称，然后点击“保存当前”。" />
+                    String="输入名称可保存；从下拉列表选择预设可立即应用。" />
             <String Id="NAME_REQUIRED"
                     String="请先输入预设名称。" />
             <String Id="NAME_HINT"
@@ -13,11 +13,9 @@
             <String Id="NAME_PLACEHOLDER"
                     String="预设名称…" />
             <String Id="LIST_HINT"
-                    String="当前游戏已保存的配置预设" />
+                    String="选择预设后立即应用于当前游戏" />
             <String Id="SAVE"
                     String="保存当前" />
-            <String Id="APPLY"
-                    String="应用" />
             <String Id="DELETE"
                     String="删除" />
             <String Id="IMPORT"
@@ -39,7 +37,7 @@
             <String Id="DELETED"
                     String="已删除预设“{0}”。" />
             <String Id="IMPORTED"
-                    String="已导入预设“{0}”。点击“应用”后生效。" />
+                    String="已导入预设“{0}”。从下拉列表选择即可应用。" />
             <String Id="EXPORTED"
                     String="已导出预设“{0}”。" />
             <String Id="STORE_UNAVAILABLE"

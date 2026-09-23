@@ -40,8 +40,6 @@ internal class SettingsViewModel : ViewModel
         {
             SetValue(ref field, value);
             CanUsePreset = value is not null;
-            if (value is not null)
-                PresetName = value.Name;
         }
     }
     public bool CanUsePreset { get; set => SetValue(ref field, value); }
@@ -133,21 +131,22 @@ internal class SettingsViewModel : ViewModel
                 PresetName,
                 SelectedGameConfiguration.Value,
                 ClientConfigHelper.GetGameConfigBy(SelectedGameConfiguration.Value));
-            RefreshPresets(preset);
+            RefreshPresets();
+            PresetName = preset.Name;
             PresetStatus = PresetLocalization.Format("SAVED", preset.Name);
         });
     }
 
-    public void ApplySelectedPreset()
+    public void ApplyPreset(GameConfigurationPreset preset)
     {
         RunPresetAction(() =>
         {
-            GameConfigurationPreset preset = RequireSelection();
             ConfigManager.RunBatched(() =>
             {
                 Store.Apply(preset, ClientConfigHelper.GetGameConfigBy(preset.Game));
                 ConfigManager.Save(ClientConfig.CONFIG_NAME);
             });
+            PresetName = preset.Name;
             PresetStatus = PresetLocalization.Format("APPLIED", preset.Name);
         });
     }
@@ -172,7 +171,7 @@ internal class SettingsViewModel : ViewModel
             {
                 SelectedGameConfiguration.Value = preset.Game;
                 ChangeSettingsGroup();
-                RefreshPresets(preset);
+                RefreshPresets();
             }
 
             PresetStatus = PresetLocalization.Format("IMPORTED", preset.Name);
@@ -207,8 +206,9 @@ internal class SettingsViewModel : ViewModel
         }
     }
 
-    private void RefreshPresets(GameConfigurationPreset? selected = null)
+    private void RefreshPresets()
     {
+        SelectedPreset = null;
         Presets.Clear();
         if (_presetStore is null)
             return;
@@ -218,10 +218,8 @@ internal class SettingsViewModel : ViewModel
             .OrderBy(it => it.Name))
             Presets.Add(preset);
 
-        SelectedPreset = selected;
-        PresetName = selected?.Name ?? string.Empty;
-        if (selected is null)
-            PresetStatus = PresetLocalization.Get("INSTRUCTIONS");
+        PresetName = string.Empty;
+        PresetStatus = PresetLocalization.Get("INSTRUCTIONS");
     }
 
     public void ExecuteUpdate() => App.Restart();
